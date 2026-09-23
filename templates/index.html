@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Phishing URL Detector</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 50px 20px 30px;
+        }
+
+        header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #38bdf8;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .error {
+            background: #450a0a;
+            border: 1px solid #ef4444;
+            color: #fecaca;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .result {
+            margin-top: 25px;
+        }
+
+        .result-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .prediction {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .phishing {
+            background: #450a0a;
+            border: 1px solid #ef4444;
+        }
+
+        .legitimate {
+            background: #052e16;
+            border: 1px solid #22c55e;
+        }
+
+        .prediction h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .detail-box {
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .detail-box h3 {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .detail-box p {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .high {
+            color: #ef4444;
+        }
+
+        .medium {
+            color: #f59e0b;
+        }
+
+        .low {
+            color: #22c55e;
+        }
+
+        .url-box {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin-bottom: 25px;
+            color: #cbd5e1;
+        }
+
+        .indicators h3 {
+            margin-bottom: 15px;
+        }
+
+        .indicators ul {
+            list-style: none;
+        }
+
+        .indicators li {
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 7px;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+
+        .indicators li::before {
+            content: "⚠ ";
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 28px;
+            }
+        }
+
+        .features-section {
+    margin-top: 30px;
+}
+
+.features-section h3 {
+    margin-bottom: 15px;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.feature-box {
+    background: #0f172a;
+    padding: 14px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.feature-name {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.feature-value {
+    font-weight: bold;
+    color: #e2e8f0;
+}
+
+@media (max-width: 700px) {
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>🛡️ Phishing URL Detector</h1>
+        <p>Machine Learning-Based URL Risk Analysis System</p>
+    </header>
+
+    <div class="card">
+
+        <form method="POST">
+
+            <div class="form-group">
+                <label for="url">Enter a URL to analyze</label>
+
+                <input
+                    type="text"
+                    id="url"
+                    name="url"
+                    placeholder="https://example.com"
+                    value="{{ url }}"
+                >
+            </div>
+
+            <button type="submit">
+                Analyze URL
+            </button>
+
+        </form>
+
+        {% if error %}
+        <div class="error" style="margin-top: 20px;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if result %}
+
+        <div class="result">
+
+            <div class="prediction
+                {% if result.result == 'PHISHING' %}
+                    phishing
+                {% else %}
+                    legitimate
+                {% endif %}
+            ">
+
+                {% if result.result == 'PHISHING' %}
+                    <h2>⚠️ Potential Phishing URL</h2>
+                    <p>The model detected characteristics associated with phishing URLs.</p>
+                {% else %}
+                    <h2>✅ Likely Legitimate URL</h2>
+                    <p>The model did not detect strong phishing characteristics.</p>
+                {% endif %}
+
+            </div>
+
+            <h3>Analyzed URL</h3>
+
+            <div class="url-box">
+                {{ result.url }}
+            </div>
+
+            <div class="details">
+
+                <div class="detail-box">
+                    <h3>Prediction</h3>
+                    <p>{{ result.result }}</p>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Risk Level</h3>
+
+                    <p class="
+                        {% if result.risk == 'HIGH' %}
+                            high
+                        {% elif result.risk == 'MEDIUM' %}
+                            medium
+                        {% else %}
+                            low
+                        {% endif %}
+                    ">
+                        {{ result.risk }}
+                    </p>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Phishing Probability</h3>
+                    <p>{{ result.phishing_probability }}%</p>
+                </div>
+
+            </div>
+
+            <div class="indicators">
+
+                <h3>Security Indicators</h3>
+
+                <ul>
+                    {% for indicator in result.indicators %}
+                        <li>{{ indicator }}</li>
+                    {% endfor %}
+                </ul>
+
+            </div>
+            <div class="features-section">
+
+    <h3>Extracted URL Features</h3>
+
+    <div class="feature-grid">
+
+        {% for feature in result.formatted_features %}
+
+        <div class="feature-box">
+
+            <span class="feature-name">
+                {{ feature.name }}
+            </span>
+
+            <span class="feature-value">
+                {{ feature.value }}
+            </span>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <footer>
+        Phishing URL Detector • Dhanushmoorthy S
+    </footer>
+
+</div>
+
+</body>
+</html>
